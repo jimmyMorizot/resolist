@@ -1,4 +1,4 @@
-import { Category, CategoryConfig } from '@/types';
+import type { Category, CategoryConfig } from '@/types';
 
 /**
  * Configuration complète des catégories

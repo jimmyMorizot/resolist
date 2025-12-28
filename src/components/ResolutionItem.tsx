@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Resolution } from '@/types';
+import type { Resolution } from '@/types';
 import { getCategoryConfig } from '@/lib/categories';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2 } from 'lucide-react';
-import * as IconModule from 'lucide-react';
+import { Pencil, Trash2, Heart, Briefcase, User, DollarSign, Sparkles, MoreHorizontal, type LucideIcon } from 'lucide-react';
 
 interface ResolutionItemProps {
   resolution: Resolution;
@@ -32,9 +31,17 @@ export function ResolutionItem({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const categoryConfig = getCategoryConfig(resolution.category);
 
-  // Dynamically get the icon component
-  const IconComponent =
-    IconModule[categoryConfig.icon as keyof typeof IconModule] || IconModule.MoreHorizontal;
+  // Map icon names to components
+  const iconMap: Record<string, LucideIcon> = {
+    Heart,
+    Briefcase,
+    User,
+    DollarSign,
+    Sparkles,
+    MoreHorizontal,
+  };
+
+  const IconComponent = iconMap[categoryConfig.icon] || MoreHorizontal;
 
   const handleToggle = () => {
     onToggle(resolution.id);

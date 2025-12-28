@@ -1,4 +1,4 @@
-import { Resolution } from '@/types';
+import type { Resolution } from '@/types';
 import { ResolutionItem } from './ResolutionItem';
 import { motion, AnimatePresence } from 'framer-motion';
 

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { useResolutions } from './hooks/useResolutions';
 import { ResolutionForm } from './components/ResolutionForm';
@@ -6,15 +5,11 @@ import { ResolutionList } from './components/ResolutionList';
 import type { Resolution } from './types';
 
 function App() {
-  const { resolutions, addResolution, deleteResolution, toggleResolution, updateResolution } =
+  const { resolutions, addResolution, deleteResolution, toggleResolution } =
     useResolutions();
 
-  // State pour gérer l'édition de résolutions
-  const [editingResolution, setEditingResolution] = useState<Resolution | null>(null);
-
-  // Handler pour ouvrir le dialog d'édition
+  // Handler pour ouvrir le dialog d'édition (à implémenter dans Tâche 9)
   const handleEdit = (resolution: Resolution) => {
-    setEditingResolution(resolution);
     // TODO: Implémenter le Dialog d'édition dans la Tâche 9
     console.log('Édition de:', resolution);
   };
