@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 SPECS.md
+CLAUDE.md
 .claude
