@@ -38,7 +38,7 @@ function App() {
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
           {/* Header */}
           <header className="text-center space-y-4 mb-8">
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-bold text-black dark:text-white">
               ResoList
             </h1>
             <p className="text-slate-600 dark:text-slate-400 text-lg">
