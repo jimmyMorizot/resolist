@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Resolution } from '@/types';
 import { ResolutionItem } from './ResolutionItem';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +10,8 @@ interface ResolutionListProps {
   onEdit: (resolution: Resolution) => void;
 }
 
-export function ResolutionList({
+// Memoïser le composant pour éviter des re-renders inutiles
+export const ResolutionList = memo(function ResolutionList({
   resolutions,
   onToggle,
   onDelete,
@@ -19,7 +21,7 @@ export function ResolutionList({
   if (resolutions.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-400 mb-2">
+        <div className="text-muted-foreground mb-2">
           <svg
             className="mx-auto h-12 w-12"
             fill="none"
@@ -35,10 +37,10 @@ export function ResolutionList({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">
+        <h3 className="text-lg font-medium text-foreground mb-1">
           Aucune résolution pour le moment
         </h3>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Commencez par ajouter votre première résolution ci-dessus.
         </p>
       </div>
@@ -72,4 +74,4 @@ export function ResolutionList({
       </AnimatePresence>
     </div>
   );
-}
+});

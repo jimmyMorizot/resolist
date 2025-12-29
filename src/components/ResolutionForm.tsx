@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, memo, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,7 +43,7 @@ interface ResolutionFormProps {
  * - Focus automatique sur le champ titre après ajout
  * - Gestion des erreurs avec affichage utilisateur
  */
-export function ResolutionForm({ onAdd }: ResolutionFormProps) {
+export const ResolutionForm = memo(function ResolutionForm({ onAdd }: ResolutionFormProps) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Category>('personal');
   const [error, setError] = useState('');
@@ -129,7 +129,7 @@ export function ResolutionForm({ onAdd }: ResolutionFormProps) {
           <SelectTrigger id="category" className="w-full">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-slate-900">
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
                 <span className="flex items-center gap-2">
@@ -147,4 +147,4 @@ export function ResolutionForm({ onAdd }: ResolutionFormProps) {
       </Button>
     </form>
   );
-}
+});

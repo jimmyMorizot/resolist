@@ -1,18 +1,41 @@
+import { useState, useCallback, useMemo } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { useResolutions } from './hooks/useResolutions';
 import { ResolutionForm } from './components/ResolutionForm';
 import { ResolutionList } from './components/ResolutionList';
-import type { Resolution } from './types';
+import { CategoryFilter } from './components/CategoryFilter';
+import { StatusFilterComponent, type StatusFilter } from './components/StatusFilter';
+import type { Resolution, Category } from './types';
 
 function App() {
-  const { resolutions, addResolution, deleteResolution, toggleResolution } =
+  const { resolutions, addResolution, deleteResolution, toggleResolution, updateResolution } =
     useResolutions();
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
 
-  // Handler pour ouvrir le dialog d'édition (à implémenter dans Tâche 9)
-  const handleEdit = (resolution: Resolution) => {
-    // TODO: Implémenter le Dialog d'édition dans la Tâche 9
-    console.log('Édition de:', resolution);
-  };
+  // Handler pour l'édition de résolution (memoïsé)
+  const handleEdit = useCallback((updatedResolution: Resolution) => {
+    updateResolution(updatedResolution.id, {
+      title: updatedResolution.title,
+      category: updatedResolution.category,
+    });
+  }, [updateResolution]);
+
+  // Filtrer les résolutions selon les catégories ET le statut (memoïsé)
+  const filteredResolutions = useMemo(() => {
+    return resolutions.filter((r) => {
+      // Filtre par catégorie
+      const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(r.category);
+
+      // Filtre par statut
+      const statusMatch =
+        selectedStatus === 'all' ||
+        (selectedStatus === 'completed' && r.completed) ||
+        (selectedStatus === 'pending' && !r.completed);
+
+      return categoryMatch && statusMatch;
+    });
+  }, [resolutions, selectedCategories, selectedStatus]);
 
   return (
     <>
@@ -45,19 +68,34 @@ function App() {
 
             {/* Section Liste des Résolutions */}
             <section className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 sm:p-8 border border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between gap-4 mb-4">
                 <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
                   Mes résolutions
                 </h2>
+
+                {/* Filtrage par catégorie */}
                 {resolutions.length > 0 && (
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
-                    {resolutions.filter((r) => r.completed).length} / {resolutions.length}{' '}
-                    complétées
-                  </div>
+                  <CategoryFilter
+                    resolutions={resolutions}
+                    selectedCategories={selectedCategories}
+                    onCategoriesChange={setSelectedCategories}
+                  />
                 )}
               </div>
+
+              {/* Filtrage par statut */}
+              {resolutions.length > 0 && (
+                <div className="mb-6">
+                  <StatusFilterComponent
+                    resolutions={resolutions}
+                    selectedStatus={selectedStatus}
+                    onStatusChange={setSelectedStatus}
+                  />
+                </div>
+              )}
+
               <ResolutionList
-                resolutions={resolutions}
+                resolutions={filteredResolutions}
                 onToggle={toggleResolution}
                 onDelete={deleteResolution}
                 onEdit={handleEdit}
