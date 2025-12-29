@@ -8,9 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getCategoryConfig, getAllCategories } from '@/lib/categories';
+import { getCategoryConfig, getAllCategories, getIconComponent } from '@/lib/categories';
 import type { Category, Resolution } from '@/types';
-import { Filter, X, Heart, Briefcase, User, DollarSign, Sparkles, MoreHorizontal, type LucideIcon } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 
 interface CategoryFilterProps {
   resolutions: Resolution[];
@@ -25,15 +25,6 @@ export const CategoryFilter = memo(function CategoryFilter({
 }: CategoryFilterProps) {
   const allCategories = getAllCategories();
 
-  const iconMap: Record<string, LucideIcon> = {
-    Heart,
-    Briefcase,
-    User,
-    DollarSign,
-    Sparkles,
-    MoreHorizontal,
-  };
-
   const getCategoryCount = (category: Category): number => {
     return resolutions.filter((r) => r.category === category).length;
   };
@@ -47,10 +38,6 @@ export const CategoryFilter = memo(function CategoryFilter({
   };
 
   const clearFilters = () => {
-    onCategoriesChange([]);
-  };
-
-  const selectAll = () => {
     onCategoriesChange([]);
   };
 
@@ -76,7 +63,7 @@ export const CategoryFilter = memo(function CategoryFilter({
 
         <DropdownMenuCheckboxItem
           checked={allSelected}
-          onCheckedChange={selectAll}
+          onCheckedChange={clearFilters}
           className="font-medium"
         >
           Toutes les catégories
@@ -89,7 +76,7 @@ export const CategoryFilter = memo(function CategoryFilter({
 
         {allCategories.map((category) => {
           const config = getCategoryConfig(category);
-          const IconComponent = iconMap[config.icon] || MoreHorizontal;
+          const IconComponent = getIconComponent(config.icon);
           const count = getCategoryCount(category);
           const isSelected = selectedCategories.includes(category);
 

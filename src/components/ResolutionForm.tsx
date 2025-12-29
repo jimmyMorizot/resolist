@@ -13,9 +13,6 @@ import { toast } from 'sonner';
 import type { Category } from '../types';
 import { ValidationError } from '../hooks/useResolutions';
 
-/**
- * Configuration des catégories pour le Select
- */
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: 'health', label: 'Santé', emoji: '💪' },
   { value: 'work', label: 'Travail', emoji: '💼' },
@@ -25,54 +22,32 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: 'other', label: 'Autre', emoji: '📌' },
 ];
 
-/**
- * Props du composant ResolutionForm
- */
 interface ResolutionFormProps {
-  /** Fonction appelée lors de l'ajout d'une résolution */
   onAdd: (title: string, category: Category) => void;
 }
 
-/**
- * Composant formulaire pour ajouter une nouvelle résolution
- *
- * Features :
- * - Validation automatique (3-200 caractères)
- * - Toast de confirmation après ajout
- * - Reset automatique du formulaire
- * - Focus automatique sur le champ titre après ajout
- * - Gestion des erreurs avec affichage utilisateur
- */
 export const ResolutionForm = memo(function ResolutionForm({ onAdd }: ResolutionFormProps) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Category>('personal');
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Gère la soumission du formulaire
-   */
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     try {
-      // Appeler la fonction onAdd (qui inclut la validation)
       onAdd(title, category);
 
-      // Reset du formulaire après succès
       setTitle('');
       setCategory('personal');
       setError('');
 
-      // Toast de confirmation
       toast.success('Résolution ajoutée avec succès !', {
         description: `"${title.trim()}" a été ajoutée à votre liste.`,
       });
 
-      // Focus automatique sur le champ titre
       inputRef.current?.focus();
     } catch (err) {
-      // Gestion des erreurs de validation
       if (err instanceof ValidationError) {
         setError(err.message);
         toast.error('Erreur de validation', {
@@ -87,9 +62,6 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
     }
   };
 
-  /**
-   * Réinitialise l'erreur lors de la modification du titre
-   */
   const handleTitleChange = (value: string) => {
     setTitle(value);
     if (error) {

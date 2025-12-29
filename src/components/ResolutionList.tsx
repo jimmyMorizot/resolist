@@ -10,14 +10,15 @@ interface ResolutionListProps {
   onEdit: (resolution: Resolution) => void;
 }
 
-// Memoïser le composant pour éviter des re-renders inutiles
+const ANIMATION_DELAY_PER_ITEM = 0.05;
+const MAX_ANIMATION_DELAY = 0.3;
+
 export const ResolutionList = memo(function ResolutionList({
   resolutions,
   onToggle,
   onDelete,
   onEdit,
 }: ResolutionListProps) {
-  // Si aucune résolution, afficher un message
   if (resolutions.length === 0) {
     return (
       <div className="text-center py-12">
@@ -59,7 +60,7 @@ export const ResolutionList = memo(function ResolutionList({
             exit={{ opacity: 0, x: -100 }}
             transition={{
               duration: 0.3,
-              delay: index * 0.05,
+              delay: Math.min(index * ANIMATION_DELAY_PER_ITEM, MAX_ANIMATION_DELAY),
               layout: { duration: 0.3 },
             }}
           >

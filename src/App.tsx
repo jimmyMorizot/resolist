@@ -13,7 +13,6 @@ function App() {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
 
-  // Handler pour l'édition de résolution (memoïsé)
   const handleEdit = useCallback((updatedResolution: Resolution) => {
     updateResolution(updatedResolution.id, {
       title: updatedResolution.title,
@@ -21,13 +20,9 @@ function App() {
     });
   }, [updateResolution]);
 
-  // Filtrer les résolutions selon les catégories ET le statut (memoïsé)
   const filteredResolutions = useMemo(() => {
     return resolutions.filter((r) => {
-      // Filtre par catégorie
       const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(r.category);
-
-      // Filtre par statut
       const statusMatch =
         selectedStatus === 'all' ||
         (selectedStatus === 'completed' && r.completed) ||
@@ -110,7 +105,15 @@ function App() {
               <span className="text-red-500" aria-label="amour">
                 ♥
               </span>{' '}
-              pour le challenge DevChallenges Week 52
+              pour le challenge{' '}
+              <a
+                href="https://devchallenges.yoandev.co/challenge/week-52/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+              >
+                DevChallenges Week 52
+              </a>
             </p>
           </footer>
         </div>

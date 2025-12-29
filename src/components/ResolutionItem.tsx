@@ -1,6 +1,6 @@
 import { useState, useRef, memo } from 'react';
 import type { Resolution, Category } from '@/types';
-import { getCategoryConfig, getAllCategories } from '@/lib/categories';
+import { getCategoryConfig, getAllCategories, getIconComponent } from '@/lib/categories';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Pencil, Trash2, Heart, Briefcase, User, DollarSign, Sparkles, MoreHorizontal, type LucideIcon } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface ResolutionItemProps {
   resolution: Resolution;
@@ -53,21 +53,9 @@ export const ResolutionItem = memo(function ResolutionItem({
 
   const categoryConfig = getCategoryConfig(resolution.category);
   const allCategories = getAllCategories();
-
-  // Map icon names to components
-  const iconMap: Record<string, LucideIcon> = {
-    Heart,
-    Briefcase,
-    User,
-    DollarSign,
-    Sparkles,
-    MoreHorizontal,
-  };
-
-  const IconComponent = iconMap[categoryConfig.icon] || MoreHorizontal;
+  const IconComponent = getIconComponent(categoryConfig.icon);
   const checkboxRef = useRef<HTMLButtonElement>(null);
 
-  // Déclenche les confetti lors de la complétion (lazy loaded)
   const triggerConfetti = async () => {
     if (!checkboxRef.current) return;
 
@@ -75,7 +63,6 @@ export const ResolutionItem = memo(function ResolutionItem({
     const x = (rect.left + rect.width / 2) / window.innerWidth;
     const y = (rect.top + rect.height / 2) / window.innerHeight;
 
-    // Lazy load confetti uniquement quand nécessaire
     const confetti = (await import('canvas-confetti')).default;
 
     confetti({
@@ -90,7 +77,6 @@ export const ResolutionItem = memo(function ResolutionItem({
   };
 
   const handleToggle = () => {
-    // Déclencher les confetti seulement si on passe de non-complété à complété
     if (!resolution.completed) {
       triggerConfetti();
     }
@@ -103,7 +89,6 @@ export const ResolutionItem = memo(function ResolutionItem({
   };
 
   const handleEditClick = () => {
-    // Reset form with current values
     setEditTitle(resolution.title);
     setEditCategory(resolution.category);
     setTitleError('');
@@ -111,7 +96,6 @@ export const ResolutionItem = memo(function ResolutionItem({
   };
 
   const handleEditSave = () => {
-    // Validation
     const trimmedTitle = editTitle.trim();
 
     if (trimmedTitle.length < 3) {
@@ -124,7 +108,6 @@ export const ResolutionItem = memo(function ResolutionItem({
       return;
     }
 
-    // Call onEdit with updated resolution
     onEdit({
       ...resolution,
       title: trimmedTitle,
@@ -132,10 +115,8 @@ export const ResolutionItem = memo(function ResolutionItem({
       updatedAt: new Date().toISOString(),
     });
 
-    // Show success toast
     toast.success('Résolution modifiée avec succès');
 
-    // Close dialog
     setIsEditDialogOpen(false);
     setTitleError('');
   };
