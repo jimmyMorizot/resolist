@@ -5,6 +5,7 @@ import { ResolutionForm } from './components/ResolutionForm';
 import { ResolutionList } from './components/ResolutionList';
 import { CategoryFilter } from './components/CategoryFilter';
 import { StatusFilterComponent, type StatusFilter } from './components/StatusFilter';
+import { ThemeToggle } from './components/ThemeToggle';
 import type { Resolution, Category } from './types';
 
 function App() {
@@ -37,7 +38,11 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
           {/* Header */}
-          <header className="text-center space-y-4 mb-8">
+          <header className="text-center space-y-4 mb-8 relative">
+            {/* Theme Toggle - Position absolue en haut à droite */}
+            <div className="absolute right-0 top-0">
+              <ThemeToggle />
+            </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-black dark:text-white">
               ResoList
             </h1>

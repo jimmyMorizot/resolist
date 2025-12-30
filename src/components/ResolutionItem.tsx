@@ -172,7 +172,7 @@ export const ResolutionItem = memo(function ResolutionItem({
           variant="ghost"
           size="sm"
           onClick={handleEditClick}
-          className="hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-all hover:scale-105"
+          className="hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all hover:scale-105"
           aria-label={`Éditer la résolution: ${resolution.title}`}
         >
           <Pencil className="h-4 w-4" />
@@ -184,7 +184,7 @@ export const ResolutionItem = memo(function ResolutionItem({
             <Button
               variant="ghost"
               size="sm"
-              className="hover:bg-red-50 text-red-600 hover:text-red-700 transition-all hover:scale-105"
+              className="hover:bg-red-50 dark:hover:bg-red-950 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all hover:scale-105"
               aria-label={`Supprimer la résolution: ${resolution.title}`}
             >
               <Trash2 className="h-4 w-4" />

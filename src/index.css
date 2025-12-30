@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 
+/* Tailwind v4 - Configuration du dark mode basé sur la classe */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: oklch(0.9821 0 0);
   --foreground: oklch(0.3485 0 0);
@@ -153,5 +156,55 @@
 @layer base {
   body {
     font-family: var(--font-sans);
+  }
+
+  /* Transition fluide pour le changement de thème */
+  html,
+  html * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
+  }
+
+  /* Désactiver les transitions pour les éléments qui ne doivent pas en avoir */
+  html [data-no-theme-transition],
+  html [data-no-theme-transition] * {
+    transition: none !important;
+  }
+
+  /* Amélioration du contraste des placeholders en mode sombre (WCAG AA) */
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: oklch(0.65 0 0); /* Gris plus clair pour meilleur contraste sur fond sombre */
+    opacity: 1;
+  }
+
+  /* Correction des couleurs de texte en mode sombre pour accessibilité WCAG AA */
+  .dark {
+    /* Tous les textes par défaut en blanc/gris clair */
+    color: oklch(0.9 0 0);
+  }
+
+  /* Labels et textes de formulaire */
+  .dark label,
+  .dark .text-sm {
+    color: oklch(0.85 0 0);
+  }
+
+  /* Textes d'aide/muted */
+  .dark .text-muted-foreground {
+    color: oklch(0.7 0 0);
+  }
+
+  /* Texte dans les selects et inputs */
+  .dark select,
+  .dark [data-radix-select-trigger],
+  .dark button[role="combobox"] {
+    color: oklch(0.9 0 0);
+  }
+
+  /* Texte sélectionné dans le select trigger */
+  .dark [data-radix-select-trigger] span {
+    color: oklch(0.9 0 0);
   }
 }
