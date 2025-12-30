@@ -5,6 +5,7 @@ export interface Resolution {
   title: string;
   category: Category;
   completed: boolean;
+  dueDate?: string; // Date butoir optionnelle (format ISO)
   createdAt: string;
   updatedAt: string;
 }

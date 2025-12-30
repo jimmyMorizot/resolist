@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
 import type { Category } from '../types';
 import { ValidationError } from '../hooks/useResolutions';
@@ -23,12 +24,13 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 ];
 
 interface ResolutionFormProps {
-  onAdd: (title: string, category: Category) => void;
+  onAdd: (title: string, category: Category, dueDate?: string) => void;
 }
 
 export const ResolutionForm = memo(function ResolutionForm({ onAdd }: ResolutionFormProps) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Category>('personal');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,10 +38,11 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
     e.preventDefault();
 
     try {
-      onAdd(title, category);
+      onAdd(title, category, dueDate?.toISOString());
 
       setTitle('');
       setCategory('personal');
+      setDueDate(undefined);
       setError('');
 
       toast.success('Résolution ajoutée avec succès !', {
@@ -95,23 +98,34 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Catégorie</Label>
-        <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
-          <SelectTrigger id="category" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-white dark:bg-slate-900">
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
-                <span className="flex items-center gap-2">
-                  <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="category">Catégorie</Label>
+          <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
+            <SelectTrigger id="category" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-slate-900">
+              {CATEGORIES.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  <span className="flex items-center gap-2">
+                    <span>{cat.emoji}</span>
+                    <span>{cat.label}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Date butoir (optionnel)</Label>
+          <DatePicker
+            date={dueDate}
+            onDateChange={setDueDate}
+            placeholder="Choisir une date"
+          />
+        </div>
       </div>
 
       <Button type="submit" className="w-full">

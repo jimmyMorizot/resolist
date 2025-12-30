@@ -30,17 +30,17 @@ function validateTitle(title: string): void {
 
 export interface UseResolutionsReturn {
   resolutions: Resolution[];
-  addResolution: (title: string, category: Category) => void;
+  addResolution: (title: string, category: Category, dueDate?: string) => void;
   deleteResolution: (id: string) => void;
   toggleResolution: (id: string) => void;
-  updateResolution: (id: string, updates: Partial<Pick<Resolution, 'title' | 'category'>>) => void;
+  updateResolution: (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'dueDate'>>) => void;
 }
 
 export function useResolutions(): UseResolutionsReturn {
   const [resolutions, setResolutions] = useLocalStorage<Resolution[]>('resolutions', []);
 
   const addResolution = useCallback(
-    (title: string, category: Category) => {
+    (title: string, category: Category, dueDate?: string) => {
       validateTitle(title);
 
       const now = new Date().toISOString();
@@ -49,6 +49,7 @@ export function useResolutions(): UseResolutionsReturn {
         title: title.trim(),
         category,
         completed: false,
+        dueDate,
         createdAt: now,
         updatedAt: now,
       };
@@ -84,7 +85,7 @@ export function useResolutions(): UseResolutionsReturn {
   );
 
   const updateResolution = useCallback(
-    (id: string, updates: Partial<Pick<Resolution, 'title' | 'category'>>) => {
+    (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'dueDate'>>) => {
       try {
         if (updates.title !== undefined) {
           validateTitle(updates.title);
@@ -97,6 +98,7 @@ export function useResolutions(): UseResolutionsReturn {
                 ...resolution,
                 ...(updates.title !== undefined && { title: updates.title.trim() }),
                 ...(updates.category !== undefined && { category: updates.category }),
+                ...('dueDate' in updates && { dueDate: updates.dueDate }),
                 updatedAt: new Date().toISOString(),
               };
             }

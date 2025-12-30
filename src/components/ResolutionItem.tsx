@@ -1,9 +1,12 @@
-import { useState, useRef, memo } from 'react';
+import { useState, useRef, memo, useMemo } from 'react';
+import { format, differenceInDays } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import type { Resolution, Category } from '@/types';
 import { getCategoryConfig, getAllCategories, getIconComponent } from '@/lib/categories';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Select,
   SelectContent,
@@ -30,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 
 interface ResolutionItemProps {
   resolution: Resolution;
@@ -49,12 +52,36 @@ export const ResolutionItem = memo(function ResolutionItem({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(resolution.title);
   const [editCategory, setEditCategory] = useState<Category>(resolution.category);
+  const [editDueDate, setEditDueDate] = useState<Date | undefined>(
+    resolution.dueDate ? new Date(resolution.dueDate) : undefined
+  );
   const [titleError, setTitleError] = useState('');
 
   const categoryConfig = getCategoryConfig(resolution.category);
   const allCategories = getAllCategories();
   const IconComponent = getIconComponent(categoryConfig.icon);
   const checkboxRef = useRef<HTMLButtonElement>(null);
+
+  // Calcul du statut de la date butoir
+  const dueDateStatus = useMemo(() => {
+    if (!resolution.dueDate || resolution.completed) return null;
+
+    const dueDate = new Date(resolution.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const daysLeft = differenceInDays(dueDate, today);
+
+    if (daysLeft < 0) {
+      return { type: 'overdue' as const, label: 'En retard', daysLeft };
+    } else if (daysLeft === 0) {
+      return { type: 'today' as const, label: "Aujourd'hui", daysLeft };
+    } else if (daysLeft <= 7) {
+      return { type: 'approaching' as const, label: `${daysLeft}j restants`, daysLeft };
+    }
+    return { type: 'normal' as const, label: format(new Date(resolution.dueDate), 'd MMM', { locale: fr }), daysLeft };
+  }, [resolution.dueDate, resolution.completed]);
 
   const triggerConfetti = async () => {
     if (!checkboxRef.current) return;
@@ -91,6 +118,7 @@ export const ResolutionItem = memo(function ResolutionItem({
   const handleEditClick = () => {
     setEditTitle(resolution.title);
     setEditCategory(resolution.category);
+    setEditDueDate(resolution.dueDate ? new Date(resolution.dueDate) : undefined);
     setTitleError('');
     setIsEditDialogOpen(true);
   };
@@ -112,6 +140,7 @@ export const ResolutionItem = memo(function ResolutionItem({
       ...resolution,
       title: trimmedTitle,
       category: editCategory,
+      dueDate: editDueDate?.toISOString(),
       updatedAt: new Date().toISOString(),
     });
 
@@ -162,6 +191,34 @@ export const ResolutionItem = memo(function ResolutionItem({
             <IconComponent className="h-3.5 w-3.5" />
             {categoryConfig.label}
           </div>
+          {/* Due Date Badge */}
+          {dueDateStatus && (
+            <div
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
+                dueDateStatus.type === 'overdue'
+                  ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800'
+                  : dueDateStatus.type === 'today'
+                  ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-400 dark:border-orange-800'
+                  : dueDateStatus.type === 'approaching'
+                  ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800'
+                  : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+              } border`}
+            >
+              {dueDateStatus.type === 'overdue' ? (
+                <AlertTriangle className="h-3.5 w-3.5" />
+              ) : (
+                <Calendar className="h-3.5 w-3.5" />
+              )}
+              {dueDateStatus.label}
+            </div>
+          )}
+          {/* Show date for completed resolutions */}
+          {resolution.completed && resolution.dueDate && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium whitespace-nowrap bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700 border opacity-60">
+              <Calendar className="h-3.5 w-3.5" />
+              {format(new Date(resolution.dueDate), 'd MMM', { locale: fr })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -217,7 +274,7 @@ export const ResolutionItem = memo(function ResolutionItem({
           <DialogHeader>
             <DialogTitle>Modifier la résolution</DialogTitle>
             <DialogDescription>
-              Modifiez le titre ou la catégorie de votre résolution.
+              Modifiez le titre, la catégorie ou la date butoir de votre résolution.
             </DialogDescription>
           </DialogHeader>
 
@@ -244,29 +301,42 @@ export const ResolutionItem = memo(function ResolutionItem({
               )}
             </div>
 
-            {/* Category Select */}
-            <div className="space-y-2">
-              <label htmlFor="edit-category" className="text-sm font-medium text-foreground">
-                Catégorie
-              </label>
-              <Select value={editCategory} onValueChange={(value) => setEditCategory(value as Category)}>
-                <SelectTrigger id="edit-category">
-                  <SelectValue placeholder="Sélectionnez une catégorie" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-slate-900">
-                  {allCategories.map((category) => {
-                    const config = getCategoryConfig(category);
-                    return (
-                      <SelectItem key={category} value={category}>
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-block w-2 h-2 rounded-full ${config.colors.bg}`}></span>
-                          {config.label}
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
+            {/* Category and Due Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="edit-category" className="text-sm font-medium text-foreground">
+                  Catégorie
+                </label>
+                <Select value={editCategory} onValueChange={(value) => setEditCategory(value as Category)}>
+                  <SelectTrigger id="edit-category">
+                    <SelectValue placeholder="Sélectionnez une catégorie" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-900">
+                    {allCategories.map((category) => {
+                      const config = getCategoryConfig(category);
+                      return (
+                        <SelectItem key={category} value={category}>
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-block w-2 h-2 rounded-full ${config.colors.bg}`}></span>
+                            {config.label}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Date butoir
+                </label>
+                <DatePicker
+                  date={editDueDate}
+                  onDateChange={setEditDueDate}
+                  placeholder="Aucune date"
+                />
+              </div>
             </div>
           </div>
 

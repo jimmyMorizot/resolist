@@ -207,4 +207,71 @@
   .dark [data-radix-select-trigger] span {
     color: oklch(0.9 0 0);
   }
+
+  /* ===== CALENDRIER - Styles forcés pour lisibilité ===== */
+  /* Conteneur du calendrier */
+  [data-slot="calendar"] {
+    min-width: 280px !important;
+    padding: 1rem !important;
+  }
+
+  /* Grille des jours - espacement */
+  .rdp-month {
+    width: 100% !important;
+  }
+
+  .rdp-table {
+    width: 100% !important;
+    border-spacing: 4px !important;
+    border-collapse: separate !important;
+  }
+
+  /* Cellules des jours de la semaine */
+  .rdp-weekday {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0.75rem !important;
+    padding: 0 !important;
+    text-align: center !important;
+  }
+
+  /* Cellules des jours */
+  .rdp-day {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+  }
+
+  .rdp-day button,
+  .rdp-day_button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    font-size: 0.875rem !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Ligne de semaine */
+  .rdp-week {
+    display: flex !important;
+    gap: 2px !important;
+  }
+
+  /* En-tête des jours */
+  .rdp-weekdays {
+    display: flex !important;
+    gap: 2px !important;
+  }
+
+  /* Caption du mois */
+  .rdp-caption_label,
+  .rdp-month_caption {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0 !important;
+  }
 }
