@@ -34,6 +34,7 @@ export interface UseResolutionsReturn {
   deleteResolution: (id: string) => void;
   toggleResolution: (id: string) => void;
   updateResolution: (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'dueDate'>>) => void;
+  importResolutions: (resolutions: Resolution[]) => void;
 }
 
 export function useResolutions(): UseResolutionsReturn {
@@ -115,11 +116,19 @@ export function useResolutions(): UseResolutionsReturn {
     [setResolutions]
   );
 
+  const importResolutions = useCallback(
+    (newResolutions: Resolution[]) => {
+      setResolutions(newResolutions);
+    },
+    [setResolutions]
+  );
+
   return {
     resolutions,
     addResolution,
     deleteResolution,
     toggleResolution,
     updateResolution,
+    importResolutions,
   };
 }

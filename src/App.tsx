@@ -6,10 +6,11 @@ import { ResolutionList } from './components/ResolutionList';
 import { CategoryFilter } from './components/CategoryFilter';
 import { StatusFilterComponent, type StatusFilter } from './components/StatusFilter';
 import { ThemeToggle } from './components/ThemeToggle';
+import { ImportExportMenu } from './components/ImportExportMenu';
 import type { Resolution, Category } from './types';
 
 function App() {
-  const { resolutions, addResolution, deleteResolution, toggleResolution, updateResolution } =
+  const { resolutions, addResolution, deleteResolution, toggleResolution, updateResolution, importResolutions } =
     useResolutions();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
@@ -39,8 +40,12 @@ function App() {
         <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
           {/* Header */}
           <header className="text-center space-y-4 mb-8 relative">
-            {/* Theme Toggle - Position absolue en haut à droite */}
-            <div className="absolute right-0 top-0">
+            {/* Actions - Position absolue en haut à droite */}
+            <div className="absolute right-0 top-0 flex items-center gap-1">
+              <ImportExportMenu
+                resolutions={resolutions}
+                onImport={importResolutions}
+              />
               <ThemeToggle />
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-black dark:text-white">
