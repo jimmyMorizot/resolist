@@ -1,8 +1,9 @@
 import { useState, useRef, memo, useMemo } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { Resolution, Category } from '@/types';
+import type { Resolution, Category, Priority } from '@/types';
 import { getCategoryConfig, getAllCategories, getIconComponent } from '@/lib/categories';
+import { prioritiesConfig, prioritiesList } from '@/lib/priorities';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,12 +53,14 @@ export const ResolutionItem = memo(function ResolutionItem({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editTitle, setEditTitle] = useState(resolution.title);
   const [editCategory, setEditCategory] = useState<Category>(resolution.category);
+  const [editPriority, setEditPriority] = useState<Priority>(resolution.priority);
   const [editDueDate, setEditDueDate] = useState<Date | undefined>(
     resolution.dueDate ? new Date(resolution.dueDate) : undefined
   );
   const [titleError, setTitleError] = useState('');
 
   const categoryConfig = getCategoryConfig(resolution.category);
+  const priorityConfig = prioritiesConfig[resolution.priority];
   const allCategories = getAllCategories();
   const IconComponent = getIconComponent(categoryConfig.icon);
   const checkboxRef = useRef<HTMLButtonElement>(null);
@@ -118,6 +121,7 @@ export const ResolutionItem = memo(function ResolutionItem({
   const handleEditClick = () => {
     setEditTitle(resolution.title);
     setEditCategory(resolution.category);
+    setEditPriority(resolution.priority);
     setEditDueDate(resolution.dueDate ? new Date(resolution.dueDate) : undefined);
     setTitleError('');
     setIsEditDialogOpen(true);
@@ -140,6 +144,7 @@ export const ResolutionItem = memo(function ResolutionItem({
       ...resolution,
       title: trimmedTitle,
       category: editCategory,
+      priority: editPriority,
       dueDate: editDueDate?.toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -190,6 +195,12 @@ export const ResolutionItem = memo(function ResolutionItem({
           >
             <IconComponent className="h-3.5 w-3.5" />
             {categoryConfig.label}
+          </div>
+          {/* Priority Badge */}
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium whitespace-nowrap ${priorityConfig.colors.bg} ${priorityConfig.colors.text} border ${priorityConfig.colors.border}`}
+          >
+            {priorityConfig.label}
           </div>
           {/* Due Date Badge */}
           {dueDateStatus && (
@@ -301,8 +312,8 @@ export const ResolutionItem = memo(function ResolutionItem({
               )}
             </div>
 
-            {/* Category and Due Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Category, Priority and Due Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label htmlFor="edit-category" className="text-sm font-medium text-foreground">
                   Catégorie
@@ -323,6 +334,24 @@ export const ResolutionItem = memo(function ResolutionItem({
                         </SelectItem>
                       );
                     })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="edit-priority" className="text-sm font-medium text-foreground">
+                  Priorité
+                </label>
+                <Select value={editPriority} onValueChange={(value) => setEditPriority(value as Priority)}>
+                  <SelectTrigger id="edit-priority">
+                    <SelectValue placeholder="Sélectionnez une priorité" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-900">
+                    {prioritiesList.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {prioritiesConfig[p].label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

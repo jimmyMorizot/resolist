@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { Resolution, Category } from '../types';
+import type { Resolution, Category, Priority } from '../types';
 
 const TITLE_MIN_LENGTH = 3;
 const TITLE_MAX_LENGTH = 200;
@@ -30,10 +30,10 @@ function validateTitle(title: string): void {
 
 export interface UseResolutionsReturn {
   resolutions: Resolution[];
-  addResolution: (title: string, category: Category, dueDate?: string) => void;
+  addResolution: (title: string, category: Category, priority: Priority, dueDate?: string) => void;
   deleteResolution: (id: string) => void;
   toggleResolution: (id: string) => void;
-  updateResolution: (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'dueDate'>>) => void;
+  updateResolution: (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'priority' | 'dueDate'>>) => void;
   importResolutions: (resolutions: Resolution[]) => void;
 }
 
@@ -41,7 +41,7 @@ export function useResolutions(): UseResolutionsReturn {
   const [resolutions, setResolutions] = useLocalStorage<Resolution[]>('resolutions', []);
 
   const addResolution = useCallback(
-    (title: string, category: Category, dueDate?: string) => {
+    (title: string, category: Category, priority: Priority, dueDate?: string) => {
       validateTitle(title);
 
       const now = new Date().toISOString();
@@ -49,6 +49,7 @@ export function useResolutions(): UseResolutionsReturn {
         id: crypto.randomUUID(),
         title: title.trim(),
         category,
+        priority,
         completed: false,
         dueDate,
         createdAt: now,
@@ -86,7 +87,7 @@ export function useResolutions(): UseResolutionsReturn {
   );
 
   const updateResolution = useCallback(
-    (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'dueDate'>>) => {
+    (id: string, updates: Partial<Pick<Resolution, 'title' | 'category' | 'priority' | 'dueDate'>>) => {
       try {
         if (updates.title !== undefined) {
           validateTitle(updates.title);
@@ -99,6 +100,7 @@ export function useResolutions(): UseResolutionsReturn {
                 ...resolution,
                 ...(updates.title !== undefined && { title: updates.title.trim() }),
                 ...(updates.category !== undefined && { category: updates.category }),
+                ...(updates.priority !== undefined && { priority: updates.priority }),
                 ...('dueDate' in updates && { dueDate: updates.dueDate }),
                 updatedAt: new Date().toISOString(),
               };

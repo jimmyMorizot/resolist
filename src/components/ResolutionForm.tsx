@@ -11,8 +11,9 @@ import {
 } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
-import type { Category } from '../types';
+import type { Category, Priority } from '../types';
 import { ValidationError } from '../hooks/useResolutions';
+import { prioritiesConfig, prioritiesList } from '@/lib/priorities';
 
 const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
   { value: 'health', label: 'Santé', emoji: '💪' },
@@ -24,12 +25,13 @@ const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 ];
 
 interface ResolutionFormProps {
-  onAdd: (title: string, category: Category, dueDate?: string) => void;
+  onAdd: (title: string, category: Category, priority: Priority, dueDate?: string) => void;
 }
 
 export const ResolutionForm = memo(function ResolutionForm({ onAdd }: ResolutionFormProps) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<Category>('personal');
+  const [priority, setPriority] = useState<Priority>('high');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,10 +40,11 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
     e.preventDefault();
 
     try {
-      onAdd(title, category, dueDate?.toISOString());
+      onAdd(title, category, priority, dueDate?.toISOString());
 
       setTitle('');
       setCategory('personal');
+      setPriority('high');
       setDueDate(undefined);
       setError('');
 
@@ -98,7 +101,7 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="category">Catégorie</Label>
           <Select value={category} onValueChange={(value) => setCategory(value as Category)}>
@@ -112,6 +115,22 @@ export const ResolutionForm = memo(function ResolutionForm({ onAdd }: Resolution
                     <span>{cat.emoji}</span>
                     <span>{cat.label}</span>
                   </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="priority">Priorité</Label>
+          <Select value={priority} onValueChange={(value) => setPriority(value as Priority)}>
+            <SelectTrigger id="priority" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-slate-900">
+              {prioritiesList.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {prioritiesConfig[p].label}
                 </SelectItem>
               ))}
             </SelectContent>

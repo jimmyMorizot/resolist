@@ -1,12 +1,15 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { useResolutions } from './hooks/useResolutions';
+import { useLocalStorage } from './hooks/useLocalStorage';
 import { ResolutionForm } from './components/ResolutionForm';
 import { ResolutionList } from './components/ResolutionList';
 import { CategoryFilter } from './components/CategoryFilter';
 import { StatusFilterComponent, type StatusFilter } from './components/StatusFilter';
+import { SortSelect, type SortCriteria } from './components/SortSelect';
 import { ThemeToggle } from './components/ThemeToggle';
 import { ImportExportMenu } from './components/ImportExportMenu';
+import { prioritiesConfig } from './lib/priorities';
 import type { Resolution, Category } from './types';
 
 function App() {
@@ -14,16 +17,20 @@ function App() {
     useResolutions();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all');
+  const [sortBy, setSortBy] = useLocalStorage<SortCriteria>('sortCriteria', 'priority');
 
   const handleEdit = useCallback((updatedResolution: Resolution) => {
     updateResolution(updatedResolution.id, {
       title: updatedResolution.title,
       category: updatedResolution.category,
+      priority: updatedResolution.priority,
+      dueDate: updatedResolution.dueDate,
     });
   }, [updateResolution]);
 
-  const filteredResolutions = useMemo(() => {
-    return resolutions.filter((r) => {
+  const filteredAndSortedResolutions = useMemo(() => {
+    // 1. Filtrer
+    const filtered = resolutions.filter((r) => {
       const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(r.category);
       const statusMatch =
         selectedStatus === 'all' ||
@@ -32,7 +39,24 @@ function App() {
 
       return categoryMatch && statusMatch;
     });
-  }, [resolutions, selectedCategories, selectedStatus]);
+
+    // 2. Trier
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'priority') {
+        // Tri par priorité : high (1) → medium (2) → low (3)
+        return prioritiesConfig[a.priority].order - prioritiesConfig[b.priority].order;
+      } else if (sortBy === 'dueDate') {
+        // Tri par date butoir : les plus proches d'abord, null à la fin
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else {
+        // sortBy === 'createdAt' : les plus récentes d'abord
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [resolutions, selectedCategories, selectedStatus, sortBy]);
 
   return (
     <>
@@ -88,19 +112,20 @@ function App() {
                 )}
               </div>
 
-              {/* Filtrage par statut */}
+              {/* Filtrage par statut et tri */}
               {resolutions.length > 0 && (
-                <div className="mb-6">
+                <div className="mb-6 space-y-4">
                   <StatusFilterComponent
                     resolutions={resolutions}
                     selectedStatus={selectedStatus}
                     onStatusChange={setSelectedStatus}
                   />
+                  <SortSelect value={sortBy} onValueChange={setSortBy} />
                 </div>
               )}
 
               <ResolutionList
-                resolutions={filteredResolutions}
+                resolutions={filteredAndSortedResolutions}
                 onToggle={toggleResolution}
                 onDelete={deleteResolution}
                 onEdit={handleEdit}
